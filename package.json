@@ -1,0 +1,13 @@
+{
+  "name": "elearn-appquiz",
+  "private": true,
+  "scripts": {
+    "start": "node server/dict-server.mjs",
+    "serve:static": "npx -y serve .",
+    "firebase": "firebase",
+    "deploy:functions": "firebase deploy --only functions"
+  },
+  "devDependencies": {
+    "firebase-tools": "^14.0.0"
+  }
+}

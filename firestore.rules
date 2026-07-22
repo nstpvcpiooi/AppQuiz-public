@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && (
+        !('createdByUid' in data) ||
+        data.createdByUid == request.auth.uid
+      );
+    }
+
+    function isOwnerResource() {
+      return isOwner(resource.data);
+    }
+
+    function isOwnerRequest() {
+      return isSignedIn() && request.resource.data.createdByUid == request.auth.uid;
+    }
+
+    function keepsOwnerOnUpdate() {
+      return !('createdByUid' in resource.data) ||
+        request.resource.data.createdByUid == resource.data.createdByUid;
+    }
+
+    function ownsQuiz(quizId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/quizzes/$(quizId)).data.createdByUid == request.auth.uid;
+    }
+
+    function ownsQuizOrLegacy(quizId) {
+      let quiz = get(/databases/$(database)/documents/quizzes/$(quizId)).data;
+      return isOwner(quiz);
+    }
+
+    // Student login reads by username (no Firebase Auth).
+    match /students/{studentId} {
+      allow read: if true;
+      allow create: if isOwnerRequest();
+      allow update: if isOwnerResource() && keepsOwnerOnUpdate();
+      allow delete: if isOwnerResource();
+    }
+
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow create: if isOwnerRequest();
+      allow update: if isOwnerResource() && keepsOwnerOnUpdate();
+      allow delete: if isOwnerResource();
+    }
+
+    match /results/{resultId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isSignedIn() && ownsQuizOrLegacy(resource.data.quizId);
+    }
+
+    match /flashcardSets/{setId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if resource.data.creatorType != "teacher" || isOwnerResource();
+    }
+  }
+}

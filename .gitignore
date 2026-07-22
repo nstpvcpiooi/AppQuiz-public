@@ -1,0 +1,24 @@
+# IDE
+.cursor/
+.idea/
+.junie/
+.agents/
+
+# Dependencies
+node_modules/
+functions/node_modules/
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+
+# Temp
+.tmp_docx_extract/
+scratch/
+
+# Sensitive config (keep *.example.js tracked)
+js/config/tts.js
+js/config/ai.config.js
+
+# note
+docs/

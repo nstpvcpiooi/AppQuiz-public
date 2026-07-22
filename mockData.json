@@ -1,0 +1,62 @@
+{
+    "quizzes": [
+        {
+            "id": "q1",
+            "title": "Unit 1: Pronunciation & Grammar",
+            "mode": "practice",
+            "questions": [
+                {
+                    "id": "q1_1",
+                    "type": "pronunciation",
+                    "text": "Choose the word whose underlined part is pronounced differently from the others.",
+                    "options": ["c<b>a</b>t", "h<b>a</b>t", "b<b>a</b>t", "c<b>a</b>r"],
+                    "correctAnswer": "c<b>a</b>r",
+                    "explanation": "The 'a' in 'car' is pronounced /ɑː/, while the others are pronounced /æ/.",
+                    "audioWords": ["cat", "hat", "bat", "car"]
+                },
+                {
+                    "id": "q1_2",
+                    "type": "multiple_choice",
+                    "text": "I ___ to the store yesterday.",
+                    "options": ["go", "goes", "went", "gone"],
+                    "correctAnswer": "went",
+                    "explanation": "'Yesterday' indicates past tense, so 'went' is the correct verb form."
+                }
+            ]
+        },
+        {
+            "id": "q2",
+            "title": "Unit 2: Reading & Vocabulary",
+            "mode": "exam",
+            "timeLimit": 300,
+            "questions": [
+                {
+                    "id": "q2_1",
+                    "type": "reading_mcq",
+                    "passage": "The Amazon River is the second longest river in the world. It flows through South America and empties into the Atlantic Ocean. It is known for its incredible biodiversity.",
+                    "text": "Where does the Amazon River empty into?",
+                    "options": ["Pacific Ocean", "Atlantic Ocean", "Indian Ocean", "Arctic Ocean"],
+                    "correctAnswer": "Atlantic Ocean",
+                    "explanation": "The passage states: 'It flows through South America and empties into the Atlantic Ocean.'"
+                },
+                {
+                    "id": "q2_2",
+                    "type": "reading_fill_mcq",
+                    "passage": "Global warming is a serious environmental issue. It is caused by the increase of greenhouse ___ in the atmosphere.",
+                    "text": "Choose the correct word to fill in the blank.",
+                    "options": ["gases", "liquids", "solids", "plants"],
+                    "correctAnswer": "gases",
+                    "explanation": "Greenhouse gases (like CO2) cause global warming."
+                },
+                {
+                    "id": "q2_3",
+                    "type": "reading_fill_essay",
+                    "passage": "A person who writes books is called an ___.",
+                    "text": "Type the missing word.",
+                    "correctAnswer": "author",
+                    "explanation": "An author is a writer of a book, article, or report."
+                }
+            ]
+        }
+    ]
+}

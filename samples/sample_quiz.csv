@@ -1,0 +1,6 @@
+Type,Passage,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation
+multiple_choice,,What is the past tense of "go"?,goed,went,gone,going,went,The simple past tense of "go" is "went".
+pronunciation,,Which word has a different stress pattern?,Important,Beautiful,Wonderful,Excellent,Important,"'Important' has stress on the 2nd syllable. The others have stress on the 1st syllable."
+reading_mcq,"The Amazon rainforest is the largest rainforest in the world. It is known for its biodiversity. However, ___ is a major threat to its ecosystem.",What is the passage mainly about?,The size of the Amazon,The location of the Amazon,The biodiversity and threats to the Amazon,The history of the Amazon,The biodiversity and threats to the Amazon,The passage introduces the Amazon's biodiversity and immediately mentions a threat.
+reading_fill_mcq,,What is the missing word in the passage?,Deforestation,Water,Oxygen,Wind,Deforestation,Deforestation (chặt phá rừng) is a major threat to the rainforest ecosystem.
+reading_fill_essay,,Type the exact word to fill the blank.,,,,,Deforestation,The blank needs the word Deforestation.

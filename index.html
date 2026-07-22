@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eLearn | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    
+    <!-- Quill.js for Rich Text Formatting -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <!-- Firebase SDKs (using ES modules in firebase-init.js) -->
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app-container">
+        
+        <!-- Screen 1: Login -->
+        <section id="login-screen" class="screen active">
+            <div class="glass-card login-card">
+                <div class="logo">
+                    <span class="icon">📘</span>
+                    <h1>eLearn</h1>
+                </div>
+                <form id="login-form" class="login-form-stack">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="Username" required autocomplete="off">
+                    </div>
+                    <button type="submit" class="btn-primary w-full">
+                        <span id="login-btn-text">Log in</span>
+                        <div class="loader hidden" id="login-loader"></div>
+                    </button>
+                </form>
+                <button type="button" id="teacher-login-link" class="btn-secondary w-full login-teacher-btn">I am a teacher</button>
+            </div>
+        </section>
+
+        <!-- Admin Login Screen -->
+        <section id="admin-login-screen" class="screen hidden">
+            <div class="glass-card login-card">
+                <div class="logo">
+                    <span class="icon">👨‍🏫</span>
+                    <h1>Welcome, teacher!</h1>
+                </div>
+                <form id="admin-login-form" class="login-form-stack">
+                    <div class="input-group">
+                        <input type="email" id="admin-email" placeholder="Email" required autocomplete="username">
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
+                    </div>
+                    <p id="admin-login-error" class="admin-login-error hidden" role="alert"></p>
+                    <button type="submit" class="btn-primary w-full">
+                        <span>Log in</span>
+                    </button>
+                    <div class="login-back-wrap">
+                        <button type="button" class="btn-text btn-text-with-icon" id="back-to-student-login">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i> Back
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard Screen -->
+        <section id="admin-dashboard-screen" class="screen hidden">
+            <header class="app-header admin-header">
+                <div class="header-content admin-header-inner admin-container">
+                    <div class="admin-header-left">
+                        <div class="admin-header-brand">
+                            <span class="admin-header-brand-icon" aria-hidden="true">📘</span>
+                            <h1 class="admin-header-brand-name">eLearn</h1>
+                        </div>
+                        <nav class="admin-header-nav" role="tablist" aria-label="Teacher sections">
+                            <button type="button" class="tab-btn admin-nav-tab active" data-tab="tab-quizzes" role="tab" aria-selected="true" aria-controls="tab-quizzes">
+                                <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                                <span>Quiz</span>
+                            </button>
+                            <button type="button" class="tab-btn admin-nav-tab" data-tab="tab-flashcard" role="tab" aria-selected="false" aria-controls="tab-flashcard">
+                                <i class="fas fa-clone" aria-hidden="true"></i>
+                                <span>Flashcard</span>
+                            </button>
+                            <button type="button" class="tab-btn admin-nav-tab" data-tab="tab-results" role="tab" aria-selected="false" aria-controls="tab-results">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                <span>Assessment</span>
+                            </button>
+                            <button type="button" class="tab-btn admin-nav-tab" data-tab="tab-students" role="tab" aria-selected="false" aria-controls="tab-students">
+                                <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                                <span>My student</span>
+                            </button>
+                        </nav>
+                    </div>
+                    <div class="admin-header-actions">
+                        <button type="button" id="admin-change-password-btn" class="btn-secondary admin-logout-btn">
+                            <i class="fas fa-key" aria-hidden="true"></i> Password
+                        </button>
+                        <button id="admin-logout-btn" class="btn-secondary admin-logout-btn">
+                            <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="dashboard-content admin-container">
+                <div class="tab-content active" id="tab-quizzes">
+                    <div class="admin-section-header admin-quiz-section-header">
+                        <div>
+                            <h3>Manage Quizzes</h3>
+                            <p class="text-muted text-sm admin-quiz-section-desc">Create, organize, and assign quizzes to students</p>
+                        </div>
+                        <div class="admin-quiz-actions">
+                            <div class="admin-quiz-actions-group admin-quiz-actions-group--import">
+                                <label for="csv-import-input" class="btn-secondary admin-action-btn admin-quiz-action-btn cursor-pointer">
+                                    <i class="fas fa-table" aria-hidden="true"></i> Import CSV
+                                </label>
+                                <input type="file" id="csv-import-input" accept=".csv" class="hidden">
+                                <button type="button" id="btn-smart-import" class="btn-secondary admin-action-btn admin-quiz-action-btn">
+                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Smart Import
+                                </button>
+                            </div>
+                            <div class="admin-quiz-actions-group admin-quiz-actions-group--create">
+                                <button type="button" id="btn-create-quiz" class="btn-primary admin-action-btn admin-quiz-action-btn" aria-label="Create new quiz">
+                                    <i class="fas fa-plus" aria-hidden="true"></i> Create
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-quiz-toolbar">
+                        <div class="admin-quiz-toolbar-row">
+                            <div class="admin-quiz-search-wrap">
+                                <i class="fas fa-search admin-quiz-search-icon" aria-hidden="true"></i>
+                                <input type="search" id="admin-quiz-search" class="admin-quiz-search-input" placeholder="Search by title…" autocomplete="off" aria-label="Search quizzes">
+                            </div>
+                            <div class="admin-quiz-toolbar-filters">
+                                <div class="admin-quiz-filter-group" role="group" aria-label="Quiz list filters">
+                                    <div class="admin-quiz-filter-item">
+                                        <span class="admin-quiz-filter-item-label">
+                                            <i class="fas fa-tag" aria-hidden="true"></i>
+                                            Type
+                                        </span>
+                                        <span class="admin-quiz-select-wrap">
+                                            <select id="admin-quiz-filter-type" class="admin-quiz-select" aria-label="Filter by type">
+                                                <option value="all">All types</option>
+                                                <option value="practice">Practice</option>
+                                                <option value="exam">Exam</option>
+                                                <option value="sub-quiz">Sub-quiz</option>
+                                                <option value="hidden">Hidden</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="admin-quiz-filter-item">
+                                        <span class="admin-quiz-filter-item-label">
+                                            <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+                                            Sort
+                                        </span>
+                                        <span class="admin-quiz-select-wrap">
+                                            <select id="admin-quiz-sort" class="admin-quiz-select" aria-label="Sort quizzes">
+                                                <option value="date-desc">Newest first</option>
+                                                <option value="date-asc">Oldest first</option>
+                                                <option value="name-asc">Name (A → Z)</option>
+                                                <option value="name-desc">Name (Z → A)</option>
+                                                <option value="questions-desc">Most questions</option>
+                                                <option value="questions-asc">Fewest questions</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="admin-quiz-filter-item">
+                                        <span class="admin-quiz-filter-item-label">
+                                            <i class="fas fa-layer-group" aria-hidden="true"></i>
+                                            Group
+                                        </span>
+                                        <span class="admin-quiz-select-wrap">
+                                            <select id="admin-quiz-group" class="admin-quiz-select" aria-label="Group quizzes">
+                                                <option value="none">No grouping</option>
+                                                <option value="date">By date created</option>
+                                                <option value="name">By title (A–Z)</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="admin-quiz-count" class="admin-quiz-count" aria-live="polite">Loading quizzes…</p>
+                    </div>
+
+                    <div id="admin-quiz-bulk-bar" class="admin-quiz-bulk-bar hidden">
+                        <div class="admin-quiz-bulk-start">
+                            <label class="admin-quiz-select-all-label">
+                                <input type="checkbox" id="admin-quiz-select-all" aria-label="Select all visible quizzes">
+                                <span>Select all</span>
+                            </label>
+                            <span id="admin-quiz-selected-count" class="admin-quiz-selected-count">0 selected</span>
+                        </div>
+                        <div id="admin-quiz-bulk-actions" class="admin-quiz-bulk-actions hidden">
+                            <button type="button" id="admin-quiz-bulk-mix" class="btn-secondary btn-sm">
+                                <i class="fas fa-shuffle" aria-hidden="true"></i> Mix
+                            </button>
+                            <button type="button" id="admin-quiz-bulk-access" class="btn-secondary btn-sm">
+                                <i class="fas fa-users" aria-hidden="true"></i> Manage access
+                            </button>
+                            <button type="button" id="admin-quiz-bulk-delete" class="btn-secondary btn-sm admin-quiz-bulk-delete-btn">
+                                <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                            </button>
+                            <button type="button" id="admin-quiz-clear-selection" class="btn-text btn-sm">Clear</button>
+                        </div>
+                    </div>
+
+                    <div id="admin-quizzes-list" class="admin-quiz-list" role="list"></div>
+                </div>
+
+                <div class="tab-content hidden" id="tab-flashcard">
+                    <div class="admin-section-header admin-quiz-section-header">
+                        <div>
+                            <h3>Manage Flashcard Sets</h3>
+                            <p class="text-muted text-sm admin-quiz-section-desc">Create and assign vocabulary flashcard sets to students</p>
+                        </div>
+                        <div class="admin-quiz-actions">
+                            <div class="admin-quiz-actions-group admin-quiz-actions-group--create">
+                                <button type="button" id="btn-create-flashcard" class="btn-primary admin-action-btn admin-quiz-action-btn" aria-label="Create new flashcard set">
+                                    <i class="fas fa-plus" aria-hidden="true"></i> Create
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-quiz-toolbar">
+                        <div class="admin-quiz-toolbar-row">
+                            <div class="admin-quiz-search-wrap">
+                                <i class="fas fa-search admin-quiz-search-icon" aria-hidden="true"></i>
+                                <input type="search" id="admin-flashcard-search" class="admin-quiz-search-input" placeholder="Search by title…" autocomplete="off" aria-label="Search flashcard sets">
+                            </div>
+                            <div class="admin-quiz-toolbar-filters">
+                                <div class="admin-quiz-filter-group" role="group" aria-label="Flashcard list filters">
+                                    <div class="admin-quiz-filter-item">
+                                        <span class="admin-quiz-filter-item-label">
+                                            <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+                                            Sort
+                                        </span>
+                                        <span class="admin-quiz-select-wrap">
+                                            <select id="admin-flashcard-sort" class="admin-quiz-select" aria-label="Sort flashcard sets">
+                                                <option value="date-desc">Newest first</option>
+                                                <option value="date-asc">Oldest first</option>
+                                                <option value="name-asc">Name (A → Z)</option>
+                                                <option value="name-desc">Name (Z → A)</option>
+                                                <option value="cards-desc">Most cards</option>
+                                                <option value="cards-asc">Fewest cards</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="admin-quiz-filter-item">
+                                        <span class="admin-quiz-filter-item-label">
+                                            <i class="fas fa-layer-group" aria-hidden="true"></i>
+                                            Group
+                                        </span>
+                                        <span class="admin-quiz-select-wrap">
+                                            <select id="admin-flashcard-group" class="admin-quiz-select" aria-label="Group flashcard sets">
+                                                <option value="none">No grouping</option>
+                                                <option value="date">By date created</option>
+                                                <option value="name">By title (A–Z)</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="admin-flashcard-count" class="admin-quiz-count" aria-live="polite">Loading…</p>
+                    </div>
+
+                    <div id="admin-flashcard-bulk-bar" class="admin-quiz-bulk-bar hidden">
+                        <div class="admin-quiz-bulk-start">
+                            <label class="admin-quiz-select-all-label">
+                                <input type="checkbox" id="admin-flashcard-select-all" aria-label="Select all visible flashcard sets">
+                                <span>Select all</span>
+                            </label>
+                            <span id="admin-flashcard-selected-count" class="admin-quiz-selected-count">0 selected</span>
+                        </div>
+                        <div id="admin-flashcard-bulk-actions" class="admin-quiz-bulk-actions hidden">
+                            <button type="button" id="admin-flashcard-bulk-access" class="btn-secondary btn-sm">
+                                <i class="fas fa-users" aria-hidden="true"></i> Manage access
+                            </button>
+                            <button type="button" id="admin-flashcard-bulk-delete" class="btn-secondary btn-sm admin-quiz-bulk-delete-btn">
+                                <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                            </button>
+                            <button type="button" id="admin-flashcard-clear-selection" class="btn-text btn-sm">Clear</button>
+                        </div>
+                    </div>
+
+                    <div id="admin-flashcard-list" class="admin-quiz-list" role="list"></div>
+                </div>
+
+                <div class="tab-content hidden" id="tab-results">
+                    <div class="mb-6">
+                        <h3>Student Performance Results</h3>
+                        <p class="text-muted">Tracking progress and scores across all quiz assignments</p>
+                    </div>
+                    <div id="admin-results-bulk-bar" class="admin-quiz-bulk-bar admin-results-bulk-bar hidden">
+                        <div class="admin-quiz-bulk-start">
+                            <span id="admin-results-selected-count" class="admin-quiz-selected-count">0 selected</span>
+                        </div>
+                        <div class="admin-quiz-bulk-actions">
+                            <button type="button" id="btn-results-wrong-subquiz" class="btn-secondary btn-sm">
+                                <i class="fas fa-layer-group" aria-hidden="true"></i> Sub-quiz from wrong answers
+                            </button>
+                            <button type="button" id="admin-results-clear-selection" class="btn-text btn-sm">Clear</button>
+                        </div>
+                    </div>
+                    <div class="admin-table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th class="admin-results-th-select" scope="col">
+                                        <input type="checkbox" id="admin-results-select-all" class="admin-results-select-all" aria-label="Select all results">
+                                    </th>
+                                    <th>Date</th>
+                                    <th>Student</th>
+                                    <th>Quiz</th>
+                                    <th>Score</th>
+                                    <th>Time Spent</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-results-table">
+                                <!-- Results here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-content hidden" id="tab-students">
+                    <div class="admin-section-header admin-quiz-section-header">
+                        <div>
+                            <h3>Manage Students</h3>
+                            <p class="text-muted text-sm admin-quiz-section-desc">Add students and manage who can log in to your quizzes</p>
+                        </div>
+                        <form id="add-student-form" class="admin-quiz-actions admin-students-add-form">
+                            <div class="admin-students-add-panel">
+                                <input type="text" id="new-student-username" class="admin-students-add-input" placeholder="username" autocomplete="off" aria-label="New student username">
+                                <button type="submit" id="add-student-btn" class="btn-primary admin-action-btn admin-quiz-action-btn">
+                                    <i class="fas fa-user-plus" aria-hidden="true"></i> Add Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="admin-quiz-toolbar">
+                        <div class="admin-quiz-toolbar-row">
+                            <div class="admin-quiz-search-wrap">
+                                <i class="fas fa-search admin-quiz-search-icon" aria-hidden="true"></i>
+                                <input type="search" id="admin-student-search" class="admin-quiz-search-input" placeholder="Search by username…" autocomplete="off" aria-label="Search students">
+                            </div>
+                        </div>
+                        <p id="admin-student-count" class="admin-quiz-count" aria-live="polite">Loading students…</p>
+                    </div>
+
+                    <div id="admin-students-list" class="admin-students-list" role="list">
+                        <!-- Students here -->
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Admin View Screen (Read-only Quiz Preview) -->
+        <section id="admin-view-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button id="quiz-view-back-btn" class="btn-secondary studio-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span class="welcome-text studio-mode-text">Quiz Preview</span>
+                            <h2 id="quiz-view-title" style="font-size: 1.5rem;">View Quiz</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 quiz-view-actions">
+                        <div class="quiz-view-export-dropdown">
+                            <button type="button" id="quiz-view-export-btn" class="btn-secondary studio-save-btn" aria-haspopup="true" aria-expanded="false" aria-controls="quiz-view-export-menu">
+                                <i class="fas fa-download" aria-hidden="true"></i> Export
+                            </button>
+                            <div id="quiz-view-export-menu" class="quiz-view-export-menu hidden" role="menu" aria-label="Export quiz">
+                                <button type="button" class="quiz-view-export-option" data-format="md" role="menuitem">
+                                    <i class="fab fa-markdown" aria-hidden="true"></i> Markdown (.md)
+                                </button>
+                                <button type="button" class="quiz-view-export-option" data-format="txt" role="menuitem">
+                                    <i class="fas fa-file-lines" aria-hidden="true"></i> Plain text (.txt)
+                                </button>
+                            </div>
+                        </div>
+                        <button id="quiz-view-edit-btn" class="btn-secondary studio-save-btn">
+                            <i class="fas fa-pen mr-2"></i> Edit
+                        </button>
+                        <button id="quiz-view-assign-btn" class="btn-secondary studio-save-btn">
+                            <i class="fas fa-users mr-2"></i> Manage Access
+                        </button>
+                        <button id="quiz-view-delete-btn" class="btn-secondary studio-save-btn quiz-view-delete-btn">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="container py-2 mt-8 max-w-1100 quiz-view-main">
+                <div id="quiz-view-meta" class="glass-card quiz-view-meta-card"></div>
+                <div class="glass-card quiz-view-questions-card mt-6">
+                    <h3 class="mb-4">Questions</h3>
+                    <div id="quiz-view-questions"></div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Admin Editor Screen (Quiz Studio) -->
+        <section id="admin-editor-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button id="qb-back-btn" class="btn-secondary studio-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span class="welcome-text studio-mode-text">Studio Mode</span>
+                            <h2 id="editor-page-title" class="text-6xl" style="font-size: 1.5rem;">Create New Quiz</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" id="qb-sync-explanations-btn" class="btn-secondary studio-save-btn hidden" aria-label="Copy explanations to source quizzes">
+                            <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i> Copy explanations to source
+                        </button>
+                        <button id="qb-final-save-btn" class="btn-primary studio-save-btn">
+                            <i class="fas fa-save" class="mr-2"></i> Save Quiz
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="container py-2 mt-8 max-w-1100" style="padding-bottom: 5rem;">
+                <div class="glass-card studio-main-card">
+                    <div class="qb-header-row">
+                        <div class="input-group-vertical">
+                            <label class="studio-label studio-label-primary">Quiz Title</label>
+                            <input type="text" id="qb-title" placeholder="e.g. Unit 1: Advanced Grammar" class="input-full studio-input-header">
+                        </div>
+                        <div class="input-group-vertical">
+                            <label class="studio-label">Mode</label>
+                            <select id="qb-mode" class="input-full" style="padding: 1rem 1.25rem;">
+                                <option value="practice">Practice Mode</option>
+                                <option value="exam">Exam Mode</option>
+                            </select>
+                        </div>
+                        <div class="input-group-vertical">
+                            <label class="studio-label">Time Limit</label>
+                            <input type="number" id="qb-time" placeholder="Minutes (0 = No limit)" class="input-full" style="padding: 1rem 1.25rem;">
+                        </div>
+                        <div class="input-group-vertical">
+                            <label class="studio-label">Student Access</label>
+                            <select id="qb-visibility" class="input-full" style="padding: 1rem 1.25rem;">
+                                <option value="my_students">My students</option>
+                                <option value="all">All students (shared)</option>
+                                <option value="specific">Specific students</option>
+                                <option value="hidden">Hidden</option>
+                            </select>
+                        </div>
+                        <div class="input-group-vertical">
+                            <label class="studio-label">Change all</label>
+                            <div class="flex gap-2 items-center">
+                                <select id="qb-change-all-type" class="input-full" style="padding: 1rem 1.25rem;">
+                                    <option value="multiple_choice">Multiple Choice</option>
+                                    <option value="pronunciation">Pronunciation</option>
+                                    <option value="reading_mcq">Reading (MCQ)</option>
+                                    <option value="reading_fill_mcq">Reading Fill (Choice)</option>
+                                    <option value="reading_fill_essay">Reading Fill (Text)</option>
+                                </select>
+                                <button type="button" id="qb-change-all-btn" class="btn-secondary" style="padding: 1rem 1.25rem; white-space: nowrap;">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="qb-students-panel" class="qb-students-panel hidden">
+                        <label class="studio-label">Select students who can access this quiz</label>
+                        <div id="qb-students-list" class="qb-students-list"></div>
+                    </div>
+
+                    <div class="qb-questions-section-head">
+                        <div class="qb-questions-section-top">
+                            <div class="qb-questions-section-intro">
+                                <h3 class="text-lg m-0" style="font-size: 1.25rem;">Questions List</h3>
+                            </div>
+                            <div class="qb-ai-bulk-actions">
+                                <div class="fs-dropdown" id="qb-ai-model-dropdown" style="margin-right: 8px;">
+                                    <button type="button" class="fs-mode-btn" id="qb-ai-model-btn" style="padding: 0.45rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); font-size: 0.8125rem; font-weight: 600; line-height: 1.25; min-width: 230px; display: flex; align-items: center; gap: 0.45rem;">
+                                        <i class="fas fa-robot" style="color: var(--primary, #4F46E5);"></i>
+                                        <span id="qb-ai-model-label">Beeknoee - GPT-5.5</span> 
+                                        <i class="fas fa-chevron-down" style="font-size: 0.8rem; margin-left: auto; color: var(--text-muted);"></i>
+                                    </button>
+                                    <div class="fs-dropdown-menu" id="qb-ai-model-menu" style="min-width: 260px; z-index: 100; padding: 0.35rem;">
+                                        <button type="button" class="fs-dropdown-option active" data-value="beeknoee:gpt-5.5" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Beeknoee - GPT-5.5</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="beeknoee:google/gemini-3.1-flash-lite-preview" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Beeknoee - Gemini 3.1 Flash Lite</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="beeknoee:google/gemini-2.5-flash-lite" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Beeknoee - Gemini 2.5 Flash Lite</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="google:gemini-3.5-flash" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Google - Gemini 3.5 Flash</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="google:gemini-3.1-flash-lite" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Google - Gemini 3.1 Flash Lite</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="google:gemini-3.0-flash" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Google - Gemini 3 Flash</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="google:gemini-2.5-flash" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Google - Gemini 2.5 Flash</button>
+                                        <button type="button" class="fs-dropdown-option" data-value="google:gemini-2.5-flash-lite" style="padding: 0.45rem 0.65rem; font-size: 0.8125rem; width: 100%;">Google - Gemini 2.5 Flash Lite</button>
+                                    </div>
+                                </div>
+                                <button type="button" id="qb-generate-explanations-btn" class="btn-secondary qb-ai-bulk-generate-btn" aria-label="Generate AI explanations for all questions">
+                                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Generate AI explanations for all questions
+                                </button>
+                                <button type="button" id="qb-stop-explanations-btn" class="btn-secondary qb-ai-bulk-stop-btn hidden" aria-label="Stop generating explanations">
+                                    <i class="fas fa-stop" aria-hidden="true"></i> Stop
+                                </button>
+                            </div>
+                        </div>
+                        <div id="qb-ai-bulk-progress" class="qb-ai-bulk-progress hidden" role="status" aria-live="polite">
+                            <div class="qb-ai-bulk-progress-track" aria-hidden="true">
+                                <div id="qb-ai-bulk-progress-fill" class="qb-ai-bulk-progress-fill" style="width: 0%"></div>
+                            </div>
+                            <p id="qb-ai-bulk-progress-text" class="qb-ai-bulk-progress-text">Generating… 0%</p>
+                            <p id="qb-ai-bulk-progress-model" class="qb-ai-bulk-progress-model hidden"></p>
+                        </div>
+                    </div>
+
+                    <div id="qb-questions-container">
+                        <!-- Questions added dynamically -->
+                        <div class="empty-state studio-empty-state">
+                            <i class="fas fa-layer-group" style="font-size: 3rem; color: var(--border); margin-bottom: 1.5rem; display: block;"></i>
+                            <h4 class="text-muted">No questions added yet</h4>
+                            <p class="text-muted">Choose a question type below to get started</p>
+                        </div>
+                    </div>
+
+                    <div class="editor-controls studio-controls">
+                        <div class="flex justify-center items-center gap-6 mb-8">
+                            <button id="qb-add-question-btn" class="btn-primary mt-6" style="padding: 1rem 2rem; border-radius: 12px;">
+                                <i class="fas fa-plus" class="mr-2"></i> Add Question
+                            </button>
+                            <button id="qb-add-group-btn" class="btn-secondary mt-6" style="padding: 1rem 2rem; border-radius: 12px;">
+                                <i class="fas fa-book-open mr-2"></i> Add Group (Reading Passage)
+                            </button>
+                        </div>
+                        <div class="glass-card studio-tip-card">
+                            <i class="fas fa-info-circle text-primary"></i>
+                            <p class="text-muted text-sm m-0">
+                                <strong>Tip:</strong> Use <u>___</u> (three underscores) in reading passages for fill-in-the-blank questions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Screen 2: Dashboard -->
+        <section id="dashboard-screen" class="screen hidden">
+            <header class="app-header student-header">
+                <div class="header-content student-header-inner">
+                    <div class="student-header-left">
+                        <div class="student-header-brand">
+                            <span class="student-header-brand-icon" aria-hidden="true">📘</span>
+                            <h1 class="student-header-brand-name">eLearn</h1>
+                        </div>
+                        <nav class="student-header-nav" role="tablist" aria-label="Student sections">
+                        <button type="button" class="student-nav-tab active" data-student-tab="quiz" role="tab" aria-selected="true" aria-controls="student-tab-quiz" id="student-tab-btn-quiz">
+                            <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                            <span>Quiz</span>
+                        </button>
+                        <button type="button" class="student-nav-tab" data-student-tab="dictionary" role="tab" aria-selected="false" aria-controls="student-tab-dictionary" id="student-tab-btn-dictionary">
+                            <i class="fas fa-book" aria-hidden="true"></i>
+                            <span>Dictionary</span>
+                        </button>
+                        <button type="button" class="student-nav-tab" data-student-tab="flashcard" role="tab" aria-selected="false" aria-controls="student-tab-flashcard" id="student-tab-btn-flashcard">
+                            <i class="fas fa-clone" aria-hidden="true"></i>
+                            <span>Flashcard</span>
+                        </button>
+                        </nav>
+                    </div>
+                    <div class="student-header-actions">
+                        <button type="button" class="btn-secondary student-user-btn" id="student-user-btn" title="Your profile" aria-label="Open your profile" aria-expanded="false" aria-controls="student-tab-profile">
+                            <i class="fas fa-user" aria-hidden="true"></i>
+                            <span class="student-user-label" id="display-username">Student</span>
+                        </button>
+                        <button id="logout-btn" class="btn-secondary student-logout-btn" type="button">
+                            <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                            <span class="student-logout-label">Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <main class="dashboard-content">
+                <div id="student-tab-quiz" class="student-tab-panel active" role="tabpanel" aria-labelledby="student-tab-btn-quiz">
+                <div class="student-quiz-toolbar">
+                    <div class="student-quiz-toolbar-controls">
+                        <div class="student-quiz-search-wrap">
+                            <i class="fas fa-search student-quiz-search-icon" aria-hidden="true"></i>
+                            <input type="search" id="student-quiz-search" class="student-quiz-search-input" placeholder="Search quizzes by title…" autocomplete="off" aria-label="Search quizzes">
+                        </div>
+                        <div class="admin-quiz-filter-group student-quiz-controls-group">
+                            <div class="admin-quiz-filter-item">
+                                <span class="admin-quiz-filter-item-label">
+                                    <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+                                    Sort
+                                </span>
+                                <span class="admin-quiz-select-wrap">
+                                    <select id="student-quiz-sort" class="admin-quiz-select" aria-label="Sort quizzes">
+                                        <option value="date-desc">Newest first</option>
+                                        <option value="date-asc">Oldest first</option>
+                                        <option value="name-asc">Name (A → Z)</option>
+                                        <option value="name-desc">Name (Z → A)</option>
+                                        <option value="questions-desc">Most questions</option>
+                                        <option value="questions-asc">Fewest questions</option>
+                                    </select>
+                                </span>
+                            </div>
+                            <div class="admin-quiz-filter-item">
+                                <span class="admin-quiz-filter-item-label">
+                                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                                    Group
+                                </span>
+                                <span class="admin-quiz-select-wrap">
+                                    <select id="student-quiz-group" class="admin-quiz-select" aria-label="Group quizzes">
+                                        <option value="none">No grouping</option>
+                                        <option value="status">By status</option>
+                                        <option value="date">By date created</option>
+                                        <option value="name">By title (A–Z)</option>
+                                    </select>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="student-quiz-filters">
+                        <div class="student-filter-row">
+                            <span class="student-filter-label">Type</span>
+                            <div class="student-filter-chips" role="group" aria-label="Filter by type">
+                                <button type="button" class="student-filter-chip active" data-student-type-filter="all">All</button>
+                                <button type="button" class="student-filter-chip" data-student-type-filter="practice">Practice</button>
+                                <button type="button" class="student-filter-chip" data-student-type-filter="exam">Exam</button>
+                            </div>
+                        </div>
+                        <div class="student-filter-row">
+                            <span class="student-filter-label">Status</span>
+                            <div class="student-filter-chips" role="group" aria-label="Filter by status">
+                                <button type="button" class="student-filter-chip active" data-student-status-filter="all">All</button>
+                                <button type="button" class="student-filter-chip" data-student-status-filter="not-completed">Not completed</button>
+                                <button type="button" class="student-filter-chip" data-student-status-filter="completed">Completed</button>
+                            </div>
+                        </div>
+                        <div class="student-filter-row student-filter-row--access">
+                            <span class="student-filter-label">Access</span>
+                            <div class="student-filter-chips" role="group" aria-label="Filter by access">
+                                <button type="button" class="student-filter-chip active" data-student-access-filter="all">All</button>
+                                <button type="button" class="student-filter-chip" data-student-access-filter="only-for-you">Only for you</button>
+                                <button type="button" class="student-filter-chip" data-student-access-filter="shared-for-everyone">Shared for everyone</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="student-quiz-toolbar-footer">
+                        <p id="student-quiz-count" class="student-quiz-count" aria-live="polite">
+                            <i class="fas fa-list-ul student-quiz-count-icon" aria-hidden="true"></i>
+                            <span class="student-quiz-count-text">Loading…</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div id="assignments-loader" class="dashboard-loader">
+                    <div class="spinner"></div>
+                    <p>Loading your assignments...</p>
+                </div>
+
+                <div id="student-dashboard-list">
+                    <div class="student-assignments-wrap" id="assignments-list"></div>
+                    <p id="assignments-empty" class="dashboard-empty text-muted hidden">No quizzes available yet.</p>
+                </div>
+                </div>
+
+                <div id="student-tab-dictionary" class="student-tab-panel student-dict-panel hidden" role="tabpanel" aria-labelledby="student-tab-btn-dictionary" hidden>
+                    <div id="student-dict-content" class="student-dict-layout">
+                        <section class="student-dict-hero">
+                            <h2 class="student-dict-brand">eLearn Dictionary</h2>
+                            <div class="student-dict-search-form-wrap">
+                            <form class="student-dict-search-form" id="student-dict-search-form" role="search" onsubmit="return false;">
+                                <div class="student-dict-search-box">
+                                    <div class="student-dict-type-wrap">
+                                        <select id="student-dict-type" aria-label="Dictionary type">
+                                            <option value="enVi">Laban (Anh - Việt)</option>
+                                            <option value="enEn">Laban (Anh - Anh)</option>
+                                            <option value="enSyn">Laban (Đồng nghĩa)</option>
+                                        </select>
+                                    </div>
+                                    <span class="student-dict-search-divider" aria-hidden="true"></span>
+                                    <input type="text" id="student-dict-search" class="student-dict-search-input" placeholder="Nhập từ cần tra…" autocomplete="off" aria-label="Dictionary search" maxlength="49" enterkeyhint="search">
+                                    <button type="button" id="student-dict-search-clear" class="student-dict-search-clear hidden" aria-label="Clear search" hidden>
+                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" id="student-dict-search-btn" class="student-dict-search-submit" aria-label="Look up word">
+                                        <i class="fas fa-search" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="student-dict-suggestions" class="student-dict-suggestions hidden" hidden>
+                                <ul class="student-dict-suggestions-list" role="listbox" aria-label="Gợi ý từ"></ul>
+                            </div>
+                            </div>
+                        </section>
+
+                        <div id="student-dict-loader" class="student-dict-loader hidden" aria-live="polite">
+                            <div class="spinner"></div>
+                            <p>Đang tra từ…</p>
+                        </div>
+
+                        <p id="student-dict-error" class="student-dict-message student-dict-message--error hidden" role="alert"></p>
+
+                        <section id="student-dict-guide" class="student-dict-guide hidden" aria-label="Hướng dẫn tra từ điển" hidden>
+                            <div class="student-dict-guide-header">
+                                <div class="student-dict-guide-icon" aria-hidden="true">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <div class="student-dict-guide-heading">
+                                    <span class="student-dict-guide-label">Mẹo sử dụng</span>
+                                    <h3 class="student-dict-guide-title">Hướng dẫn tra từ</h3>
+                                </div>
+                            </div>
+                            <ol class="student-dict-guide-steps">
+                                <li class="student-dict-guide-step">
+                                    <span class="student-dict-guide-step-icon" aria-hidden="true"><i class="fas fa-magnifying-glass"></i></span>
+                                    <p class="student-dict-guide-step-text">Nhập từ tiếng Anh, nhấn <strong>Enter</strong> hoặc nút <strong>tìm kiếm</strong>.</p>
+                                </li>
+                                <li class="student-dict-guide-step">
+                                    <span class="student-dict-guide-step-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+                                    <p class="student-dict-guide-step-text">Chọn <strong>Anh – Việt</strong>, <strong>Anh – Anh</strong> hoặc <strong>Đồng nghĩa</strong>.</p>
+                                </li>
+                                <li class="student-dict-guide-step">
+                                    <span class="student-dict-guide-step-icon" aria-hidden="true"><i class="fas fa-volume-high"></i></span>
+                                    <p class="student-dict-guide-step-text">Gõ vài ký tự để xem gợi ý; nghe phát âm <strong>UK</strong> / <strong>US</strong>.</p>
+                                </li>
+                                <li class="student-dict-guide-step">
+                                    <span class="student-dict-guide-step-icon" aria-hidden="true"><i class="fas fa-clock-rotate-left"></i></span>
+                                    <p class="student-dict-guide-step-text">Xem lại từ đã tra trong <strong>Lịch sử tra từ</strong>.</p>
+                                </li>
+                            </ol>
+                        </section>
+
+                        <section id="student-dict-history" class="student-dict-history hidden" aria-label="Lịch sử tra từ" hidden>
+                            <div class="student-dict-history-header">
+                                <h3 class="student-dict-history-title">Lịch sử tra từ</h3>
+                                <button type="button" id="student-dict-history-clear" class="student-dict-history-clear">Xóa tất cả</button>
+                            </div>
+                            <ul id="student-dict-history-list" class="student-dict-history-list" role="list"></ul>
+                        </section>
+
+                        <article id="student-dict-result" class="student-dict-result hidden">
+                            <header class="student-dict-word-header">
+                                <h3 id="student-dict-word" class="student-dict-word">—</h3>
+                                <div class="student-dict-word-meta">
+                                    <p id="student-dict-phonetic" class="student-dict-phonetic"></p>
+                                    <div class="student-dict-pronounce-group">
+                                        <button type="button" id="student-dict-sound-uk" class="student-dict-pronounce-btn" title="UK pronunciation" aria-label="Play UK pronunciation">
+                                            <i class="fas fa-volume-up" aria-hidden="true"></i>
+                                            <span>UK</span>
+                                        </button>
+                                        <button type="button" id="student-dict-sound-us" class="student-dict-pronounce-btn" title="US pronunciation" aria-label="Play US pronunciation">
+                                            <i class="fas fa-volume-up" aria-hidden="true"></i>
+                                            <span>US</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </header>
+                            <div id="student-dict-senses" class="student-dict-senses" aria-live="polite"></div>
+                        </article>
+                    </div>
+                </div>
+
+                <div id="student-tab-flashcard" class="student-tab-panel hidden" role="tabpanel" aria-labelledby="student-tab-btn-flashcard" hidden>
+                    <div class="student-quiz-toolbar">
+                        <div class="student-quiz-toolbar-controls">
+                            <div class="student-quiz-search-wrap">
+                                <i class="fas fa-search student-quiz-search-icon" aria-hidden="true"></i>
+                                <input type="search" id="student-flashcard-search" class="student-quiz-search-input" placeholder="Search sets by title…" autocomplete="off" aria-label="Search flashcard sets">
+                            </div>
+                            <div class="admin-quiz-filter-group student-quiz-controls-group">
+                                <div class="admin-quiz-filter-item">
+                                    <span class="admin-quiz-filter-item-label">
+                                        <i class="fas fa-arrow-down-wide-short" aria-hidden="true"></i>
+                                        Sort
+                                    </span>
+                                    <span class="admin-quiz-select-wrap">
+                                        <select id="student-flashcard-sort" class="admin-quiz-select" aria-label="Sort flashcard sets">
+                                            <option value="date-desc">Newest first</option>
+                                            <option value="date-asc">Oldest first</option>
+                                            <option value="name-asc">Name (A → Z)</option>
+                                            <option value="name-desc">Name (Z → A)</option>
+                                            <option value="cards-desc">Most cards</option>
+                                            <option value="cards-asc">Fewest cards</option>
+                                        </select>
+                                    </span>
+                                </div>
+                                <div class="admin-quiz-filter-item">
+                                    <span class="admin-quiz-filter-item-label">
+                                        <i class="fas fa-layer-group" aria-hidden="true"></i>
+                                        Group
+                                    </span>
+                                    <span class="admin-quiz-select-wrap">
+                                        <select id="student-flashcard-group" class="admin-quiz-select" aria-label="Group flashcard sets">
+                                            <option value="none">No grouping</option>
+                                            <option value="type">By type</option>
+                                            <option value="date">By date created</option>
+                                            <option value="name">By title (A–Z)</option>
+                                        </select>
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="margin-left:auto;">
+                                <button type="button" id="btn-create-personal-flashcard" class="btn-primary admin-action-btn admin-quiz-action-btn">
+                                    <i class="fas fa-plus" aria-hidden="true"></i> Create
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="student-quiz-filters">
+                            <div class="student-filter-row">
+                                <span class="student-filter-label">Type</span>
+                                <div class="student-filter-chips" role="group" aria-label="Filter by type">
+                                    <button type="button" class="student-filter-chip active" data-student-fc-type-filter="all">All</button>
+                                    <button type="button" class="student-filter-chip" data-student-fc-type-filter="personal">My flashcard</button>
+                                    <button type="button" class="student-filter-chip" data-student-fc-type-filter="assigned">Created by teacher</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="student-quiz-toolbar-footer">
+                            <p id="student-flashcard-count" class="student-quiz-count" aria-live="polite">
+                                <i class="fas fa-list-ul student-quiz-count-icon" aria-hidden="true"></i>
+                                <span class="student-quiz-count-text">Loading…</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div id="student-flashcard-loader" class="dashboard-loader">
+                        <div class="spinner"></div>
+                        <p>Loading flashcard sets...</p>
+                    </div>
+
+                    <div id="student-flashcard-content">
+                        <div id="student-flashcard-list" class="student-assignments-wrap"></div>
+                        <p id="student-flashcard-empty" class="dashboard-empty text-muted hidden">No flashcard sets yet.</p>
+                    </div>
+                </div>
+
+                <div id="student-tab-profile" class="student-tab-panel hidden" role="region" aria-labelledby="student-user-btn" hidden>
+                    <div class="student-profile">
+                        <div class="glass-card student-profile-card">
+                            <div class="student-profile-header">
+                                <div class="student-profile-avatar" id="profile-avatar" aria-hidden="true">A</div>
+                                <div class="student-profile-identity">
+                                    <h2 class="student-profile-name" id="profile-username">Student</h2>
+                                    <p class="student-profile-meta" id="profile-member-since">Member since —</p>
+                                </div>
+                            </div>
+                            <div class="student-profile-stats">
+                                <div class="student-profile-stat">
+                                    <span class="student-review-stat-label">Available quizzes</span>
+                                    <strong id="profile-stat-quizzes">—</strong>
+                                </div>
+                                <div class="student-profile-stat">
+                                    <span class="student-review-stat-label">Completed</span>
+                                    <strong id="profile-stat-completed">—</strong>
+                                </div>
+                                <div class="student-profile-stat">
+                                    <span class="student-review-stat-label">Total attempts</span>
+                                    <strong id="profile-stat-attempts">—</strong>
+                                </div>
+                                <div class="student-profile-stat">
+                                    <span class="student-review-stat-label">Avg. best score</span>
+                                    <strong id="profile-stat-avg">—</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card student-profile-recent">
+                            <h3 class="student-profile-section-title">Recent activity</h3>
+                            <ul class="student-profile-activity" id="profile-recent-list"></ul>
+                            <p id="profile-recent-empty" class="dashboard-empty text-muted hidden">No quiz attempts yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Student Review Screen -->
+        <section id="student-review-screen" class="screen hidden">
+            <header class="app-header student-header student-header--subpage">
+                <div class="header-content student-header-inner">
+                    <div class="student-header-start">
+                        <button id="review-back-btn" class="btn-secondary studio-back-btn student-back-btn" type="button" aria-label="Go back">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="student-header-titles">
+                            <span class="welcome-text student-header-eyebrow">Review submission</span>
+                            <h2 class="student-header-title" id="review-quiz-title">Quiz</h2>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <main class="dashboard-content student-review-content">
+                <div class="glass-card student-review-summary">
+                    <div class="student-review-summary-grid">
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Score</span>
+                            <strong id="review-score-label">—</strong>
+                        </div>
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Time</span>
+                            <strong id="review-time-label">—</strong>
+                        </div>
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Submitted</span>
+                            <strong id="review-date-label">—</strong>
+                        </div>
+                    </div>
+                    <div id="review-attempt-wrap" class="review-attempt-wrap hidden">
+                        <label class="review-attempt-label" for="review-attempt-select">Attempt</label>
+                        <select id="review-attempt-select" class="input-full review-attempt-select"></select>
+                    </div>
+                </div>
+                <div class="glass-card results-review-card student-review-card">
+                    <header class="results-review-header results-review-header-with-actions">
+                        <div class="results-review-header-text">
+                            <h3>Answer details</h3>
+                            <p class="results-review-desc">Your answers and the correct answers for each question.</p>
+                        </div>
+                        <button type="button" id="review-wrong-filter-btn" class="btn-secondary btn-sm review-filter-btn" aria-pressed="false">
+                            Wrong answers only
+                        </button>
+                    </header>
+                    <div id="student-review-list" class="results-review-list"></div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Screen 3: Quiz Interface -->
+        <section id="quiz-screen" class="screen hidden">
+            <header class="quiz-header">
+                <div class="quiz-header-main">
+                    <div class="quiz-header-start">
+                        <button id="back-to-dashboard" class="btn-text btn-text-with-icon">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i> Exit
+                        </button>
+                    </div>
+                    <div class="quiz-header-center">
+                        <div class="quiz-meta">
+                            <h3 id="quiz-title">Quiz Title</h3>
+                            <span id="quiz-mode-badge" class="badge">Mode</span>
+                        </div>
+                        <div id="exam-part-nav" class="exam-part-nav hidden" aria-live="polite"></div>
+                    </div>
+                    <div class="quiz-header-end">
+                        <div class="quiz-timer hidden" id="quiz-timer">00:00</div>
+                        <button type="button" id="exam-submit-btn" class="btn-primary exam-header-submit hidden">Submit Exam</button>
+                        <button type="button" id="practice-help-btn" class="btn-icon quiz-help-btn hidden" title="Help" aria-label="Help">
+                            ?
+                        </button>
+                        <button type="button" id="sound-toggle-btn" class="btn-icon sound-toggle-btn hidden" title="Toggle sound">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Progress bar moved inside header for stickiness -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="quiz-progress" style="width: 0%"></div>
+                </div>
+            </header>
+
+            <main class="quiz-content">
+                <!-- Practice Mode Container -->
+                <div id="practice-container" class="quiz-container hidden">
+                    <div id="practice-question" class="question-wrapper"></div>
+                    <div class="practice-actions">
+                        <button id="practice-submit-btn" class="btn-primary">Submit Answer</button>
+                        <button id="practice-next-btn" class="btn-secondary hidden">Next Question</button>
+                    </div>
+                </div>
+
+                <div id="practice-help-modal" class="quiz-help-modal hidden" aria-hidden="true">
+                    <div class="quiz-help-backdrop" id="practice-help-backdrop"></div>
+                    <div class="quiz-help-panel" role="dialog" aria-labelledby="practice-help-title">
+                        <div class="quiz-help-header">
+                            <h3 id="practice-help-title">Practice Mode Help</h3>
+                            <button type="button" id="practice-help-close" class="quiz-help-close" aria-label="Close">&times;</button>
+                        </div>
+                        <div class="quiz-help-body">
+                            <div class="quiz-help-section">
+                                <h4>Select an answer</h4>
+                                <p>Click an option, or press <kbd>1</kbd>–<kbd>4</kbd> / <kbd>A</kbd>–<kbd>D</kbd> to choose quickly.</p>
+                            </div>
+                            <div class="quiz-help-section">
+                                <h4>Submit your answer</h4>
+                                <p>Press <strong>Submit Answer</strong> or hit <kbd>Enter</kbd>.</p>
+                            </div>
+                            <div class="quiz-help-section">
+                                <h4>Next question</h4>
+                                <p>After viewing feedback, press <strong>Next Question</strong> or <kbd>Enter</kbd>.</p>
+                            </div>
+                            <div class="quiz-help-section">
+                                <h4>Wrong answers</h4>
+                                <p>Incorrect answers are moved to the end of the quiz for retry. You must answer all retry questions correctly to finish.</p>
+                            </div>
+                            <div class="quiz-help-section">
+                                <h4>Sound</h4>
+                                <p>Use the speaker button in the header to toggle sounds when submitting and completing the quiz.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exam Mode Container -->
+                <div id="exam-container" class="quiz-container hidden">
+                    <div id="exam-questions" class="questions-list"></div>
+                    <div class="exam-actions">
+                        <button type="button" id="exam-prev-btn" class="btn-secondary exam-nav-btn hidden">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                            <span>Previous</span>
+                        </button>
+                        <button type="button" id="exam-next-btn" class="btn-secondary exam-nav-btn hidden">
+                            <span>Next</span>
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Screen -->
+                <div id="results-container" class="results-screen hidden">
+                    <div class="results-layout max-w-1100">
+                        <div class="glass-card results-summary">
+                            <div class="score-circle">
+                                <svg viewBox="0 0 36 36" class="circular-chart">
+                                    <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path class="circle" id="score-circle-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <text x="18" y="20.35" class="percentage" id="score-percentage">0%</text>
+                                </svg>
+                            </div>
+                            <h2>Quiz Completed!</h2>
+                            <div class="stats-grid">
+                                <div class="stat-box"><span class="stat-label">Correct</span><span class="stat-value text-success" id="stat-correct">0</span></div>
+                                <div class="stat-box"><span class="stat-label">Incorrect</span><span class="stat-value text-danger" id="stat-incorrect">0</span></div>
+                                <div class="stat-box"><span class="stat-label">Time</span><span class="stat-value" id="stat-time">00:00</span></div>
+                            </div>
+                            <button id="results-home-btn" class="btn-primary">Return to Dashboard</button>
+                        </div>
+
+                        <div id="practice-review-container" class="results-review hidden">
+                            <div class="glass-card results-review-card">
+                                <header class="results-review-header">
+                                    <h3>Review incorrect answers</h3>
+                                    <p class="results-review-desc">Questions you got wrong on your first attempt. Your score is based on the first attempt only.</p>
+                                </header>
+                                <div id="practice-review-list" class="results-review-list"></div>
+                            </div>
+                        </div>
+
+                        <div id="exam-review-container" class="results-review hidden">
+                            <div class="glass-card results-review-card">
+                                <header class="results-review-header">
+                                    <h3>Review your answers</h3>
+                                    <p class="results-review-desc">Answers, explanations, and guidance for each question.</p>
+                                </header>
+                                <div id="exam-review-list" class="results-review-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+        <!-- Sub-quiz from student wrong answers (Results tab) -->
+        <section id="admin-review-sub-quiz-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button type="button" id="review-sub-quiz-back-btn" class="btn-secondary studio-back-btn" aria-label="Back to results">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span class="welcome-text studio-mode-text">From student results</span>
+                            <h2 style="font-size: 1.5rem;">Wrong-Answer Review Quiz</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" id="review-sub-quiz-studio-btn" class="btn-secondary studio-save-btn" disabled>
+                            <i class="fas fa-pen-to-square" aria-hidden="true"></i> Open in Studio
+                        </button>
+                        <button type="button" id="review-sub-quiz-save-btn" class="btn-primary studio-save-btn" disabled>
+                            <i class="fas fa-save" aria-hidden="true"></i> Save Sub-Quiz
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <main class="sub-quiz-main admin-container">
+                <p id="review-sub-quiz-summary" class="text-muted text-sm review-sub-quiz-summary">Loading…</p>
+                <div class="review-sub-quiz-layout">
+                    <div class="glass-card sub-quiz-config-card">
+                        <h3 class="mb-4">Quiz settings</h3>
+                        <div class="sub-quiz-form-grid">
+                            <div class="input-group-vertical">
+                                <label class="studio-label">Quiz Title</label>
+                                <input type="text" id="review-sub-quiz-title" class="input-full" placeholder="e.g. Review — Unit 3 mistakes">
+                            </div>
+                            <div class="input-group-vertical">
+                                <label class="studio-label">Mode</label>
+                                <select id="review-sub-quiz-mode" class="input-full">
+                                    <option value="practice">Practice Mode</option>
+                                    <option value="exam">Exam Mode</option>
+                                </select>
+                            </div>
+                            <div class="input-group-vertical">
+                                <label class="studio-label">Time Limit (minutes, exam)</label>
+                                <input type="number" id="review-sub-quiz-time" class="input-full" min="0" placeholder="0 = no limit">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card sub-quiz-preview-card review-sub-quiz-preview-card">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="m-0">Questions from wrong answers</h3>
+                            <span id="review-sub-quiz-preview-badge" class="badge">0 questions</span>
+                        </div>
+                        <div id="review-sub-quiz-preview-list" class="sub-quiz-preview-list"></div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Admin Smart Import Screen -->
+        <section id="admin-smart-import-screen" class="screen hidden" style="background: white;">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button id="smart-import-back-btn" class="btn-secondary studio-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span class="welcome-text studio-mode-text">Smart Import Workspace</span>
+                            <h2 style="font-size: 1.5rem;">Advanced Question Parser</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="smart-import-confirm-btn" class="btn-primary studio-save-btn" disabled>
+                            <i class="fas fa-file-import mr-2"></i> Import to Studio
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="smart-import-main" style="height: calc(100vh - 72px); display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border);">
+                <div class="input-panel" style="padding: 3rem; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: white;">
+                    <div class="flex justify-between items-center" style="margin-bottom: 0.75rem;">
+                        <label class="studio-label" style="margin-bottom: 0;">Raw Quiz Content</label>
+                        <button id="smart-import-clear-btn" class="btn-secondary smart-import-clear-top-btn" title="Clear All">
+                            <i class="fas fa-eraser"></i>
+                            <span style="margin-left: 0.5rem;">Clear</span>
+                        </button>
+                    </div>
+                    <div id="smart-import-editor-container" style="flex: 1; margin-bottom: 2.5rem; background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column;">
+                        <div id="smart-import-input" style="flex: 1;"></div>
+                    </div>
+                </div>
+                <div class="preview-panel" style="padding: 3rem; display: flex; flex-direction: column; background: #F8FAFC;">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <label class="studio-label m-0">Live Preview</label>
+                            <p class="text-sm text-muted">Structural visualization of detected questions</p>
+                        </div>
+                        <span class="badge" id="parsed-count-badge" style="padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 99px; background: white; border: 1px solid var(--primary); color: var(--primary);">0 questions detected</span>
+                    </div>
+                    <div id="smart-import-preview" class="preview-area is-empty" style="flex: 1; background: white; border-radius: 20px; padding: 3rem; border: 1px solid var(--border); overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
+                        <div class="empty-state">
+                            <i class="fas fa-magic mb-6 text-muted"></i>
+                            <p class="text-muted">Detected questions will appear here automatically</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Admin: view student submission (full page) -->
+        <section id="admin-result-detail-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button type="button" id="admin-result-detail-back-btn" class="btn-secondary studio-back-btn" aria-label="Back to results">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <span class="welcome-text studio-mode-text">Submission review</span>
+                            <h2 id="admin-result-detail-title" style="font-size: 1.5rem;">Quiz</h2>
+                            <p id="admin-result-detail-student" class="admin-result-detail-student"></p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <main class="admin-result-detail-main admin-container">
+                <div class="glass-card student-review-summary">
+                    <div class="student-review-summary-grid">
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Score</span>
+                            <strong id="admin-result-detail-score">—</strong>
+                        </div>
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Time</span>
+                            <strong id="admin-result-detail-time">—</strong>
+                        </div>
+                        <div class="student-review-stat">
+                            <span class="student-review-stat-label">Submitted</span>
+                            <strong id="admin-result-detail-date">—</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card results-review-card student-review-card">
+                    <header class="results-review-header results-review-header-with-actions">
+                        <div class="results-review-header-text">
+                            <h3>Answer details</h3>
+                            <p class="results-review-desc">Student answers and the correct answers for each question.</p>
+                        </div>
+                        <button type="button" id="admin-result-detail-wrong-filter-btn" class="btn-secondary btn-sm review-filter-btn" aria-pressed="false">
+                            Wrong answers only
+                        </button>
+                    </header>
+                    <div id="admin-result-detail-content" class="results-review-list"></div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Global modals (outside screens so they work on any admin page) -->
+        <div id="change-password-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="change-password-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal" role="dialog" aria-labelledby="change-password-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-password" aria-hidden="true">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div>
+                            <h3 id="change-password-title">Change password</h3>
+                            <p class="assign-modal-quiz-name">Update your teacher account password</p>
+                        </div>
+                    </div>
+                    <button type="button" id="change-password-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <form id="change-password-form" class="admin-form-modal-form">
+                    <div class="assign-modal-body admin-form-modal-body">
+                        <p id="change-password-error" class="admin-login-error hidden" role="alert"></p>
+                        <div class="admin-form-field">
+                            <label class="admin-form-field-label" for="change-password-current">Current password</label>
+                            <div class="admin-form-input-wrap">
+                                <i class="fas fa-lock admin-form-input-icon" aria-hidden="true"></i>
+                                <input type="password" id="change-password-current" class="admin-form-input" required autocomplete="current-password">
+                            </div>
+                        </div>
+                        <div class="admin-form-field">
+                            <label class="admin-form-field-label" for="change-password-new">New password</label>
+                            <div class="admin-form-input-wrap">
+                                <i class="fas fa-lock admin-form-input-icon" aria-hidden="true"></i>
+                                <input type="password" id="change-password-new" class="admin-form-input" required minlength="6" autocomplete="new-password">
+                            </div>
+                            <p class="admin-form-hint">At least 6 characters</p>
+                        </div>
+                        <div class="admin-form-field">
+                            <label class="admin-form-field-label" for="change-password-confirm">Confirm new password</label>
+                            <div class="admin-form-input-wrap">
+                                <i class="fas fa-lock admin-form-input-icon" aria-hidden="true"></i>
+                                <input type="password" id="change-password-confirm" class="admin-form-input" required minlength="6" autocomplete="new-password">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="assign-modal-footer">
+                        <button type="button" class="btn-secondary" id="change-password-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn-primary" id="change-password-submit">Save password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="edit-student-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="edit-student-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal" role="dialog" aria-labelledby="edit-student-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-student" aria-hidden="true">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h3 id="edit-student-title">Edit student</h3>
+                            <p id="edit-student-desc" class="assign-modal-quiz-name">Update login username</p>
+                        </div>
+                    </div>
+                    <button type="button" id="edit-student-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <form id="edit-student-form" class="admin-form-modal-form">
+                    <div class="assign-modal-body admin-form-modal-body">
+                        <p id="edit-student-error" class="admin-login-error hidden" role="alert"></p>
+                        <p class="assign-modal-section-label">Login username</p>
+                        <div class="admin-form-field">
+                            <div class="admin-form-input-wrap">
+                                <i class="fas fa-at admin-form-input-icon" aria-hidden="true"></i>
+                                <input type="text" id="edit-student-username" class="admin-form-input" required autocomplete="off" placeholder="username" aria-label="Student username">
+                            </div>
+                            <p class="admin-form-hint">Students use this username to sign in.</p>
+                        </div>
+                    </div>
+                    <div class="assign-modal-footer">
+                        <button type="button" class="btn-secondary" id="edit-student-cancel-btn">Cancel</button>
+                        <button type="submit" class="btn-primary" id="edit-student-submit">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="mix-quiz-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="mix-quiz-modal-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal" role="dialog" aria-labelledby="mix-quiz-modal-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon" aria-hidden="true">
+                            <i class="fas fa-shuffle"></i>
+                        </div>
+                        <div>
+                            <h3 id="mix-quiz-modal-title">Mix Quizzes</h3>
+                            <p id="mix-quiz-modal-subtitle" class="assign-modal-quiz-name">Combine questions from selected quizzes</p>
+                        </div>
+                    </div>
+                    <button type="button" id="mix-quiz-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+
+                <form id="mix-quiz-form" class="admin-form-modal-form">
+                    <div class="assign-modal-body admin-form-modal-body">
+                        <p id="mix-quiz-error" class="admin-login-error hidden" role="alert"></p>
+
+                        <p class="assign-modal-section-label">Quiz details</p>
+                        <div class="sub-quiz-form-grid">
+                            <div class="input-group-vertical">
+                                <label class="studio-label" for="mix-quiz-title">Quiz title</label>
+                                <input type="text" id="mix-quiz-title" class="input-full" placeholder="e.g. Mixed Review Test 1" required>
+                            </div>
+                            <div class="input-group-vertical">
+                                <label class="studio-label" for="mix-quiz-mode">Mode</label>
+                                <select id="mix-quiz-mode" class="input-full">
+                                    <option value="practice">Practice Mode</option>
+                                    <option value="exam">Exam Mode</option>
+                                </select>
+                            </div>
+                            <div class="input-group-vertical">
+                                <label class="studio-label" for="mix-quiz-time">Time limit (minutes, exam)</label>
+                                <input type="number" id="mix-quiz-time" class="input-full" min="0" placeholder="0 = no limit">
+                            </div>
+                            <div class="input-group-vertical">
+                                <label class="studio-label" for="mix-quiz-count">Number of questions</label>
+                                <input type="number" id="mix-quiz-count" class="input-full" min="0" value="0" aria-describedby="mix-quiz-pool-info">
+                                <p id="mix-quiz-pool-info" class="admin-form-hint m-0">0 = shuffle all questions from the selected quizzes.</p>
+                            </div>
+                        </div>
+
+                        <p class="assign-modal-section-label mt-4">Access</p>
+                        <div class="assign-visibility-options" role="radiogroup" aria-label="Mixed quiz visibility">
+                            <label class="assign-visibility-card">
+                                <input type="radio" name="mix-visibility" value="my_students" checked>
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon my-students"><i class="fas fa-users"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>My students</strong>
+                                        <small>Only students you created can see this quiz</small>
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="assign-visibility-card">
+                                <input type="radio" name="mix-visibility" value="all">
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon all"><i class="fas fa-globe"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>All students (share publicly)</strong>
+                                        <small>Every student can see this quiz</small>
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="assign-visibility-card">
+                                <input type="radio" name="mix-visibility" value="specific">
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon specific"><i class="fas fa-user-check"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>Specific students</strong>
+                                        <small>Only selected students from your roster</small>
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="assign-visibility-card">
+                                <input type="radio" name="mix-visibility" value="hidden">
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon is-hidden"><i class="fas fa-eye-slash"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>Hidden</strong>
+                                        <small>No students can see this quiz</small>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div id="mix-students-panel" class="assign-students-panel hidden">
+                            <div class="assign-students-panel-header">
+                                <p class="assign-modal-section-label m-0">Assigned students</p>
+                                <span id="mix-selected-count" class="assign-selected-count">0 selected</span>
+                            </div>
+                            <div id="mix-students-list" class="assign-students-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="assign-modal-footer">
+                        <button type="button" id="mix-quiz-cancel-btn" class="btn-secondary">Cancel</button>
+                        <button type="submit" id="mix-quiz-submit-btn" class="btn-primary">
+                            <i class="fas fa-shuffle" aria-hidden="true"></i> Create mix
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="assign-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="assign-modal-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal admin-access-modal" role="dialog" aria-labelledby="assign-modal-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-access" aria-hidden="true">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 id="assign-modal-title">Manage Quiz Access</h3>
+                            <p id="assign-modal-quiz-name" class="assign-modal-quiz-name">Choose who can see and take this quiz</p>
+                        </div>
+                    </div>
+                    <button type="button" id="assign-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+
+                <div class="assign-modal-body admin-form-modal-body">
+                    <p class="assign-modal-section-label">Visibility</p>
+                    <div class="assign-visibility-options" role="radiogroup" aria-label="Quiz visibility">
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="assign-visibility" value="my_students" checked>
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon my-students"><i class="fas fa-users"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>My students</strong>
+                                    <small>Only students you created can see this quiz</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="assign-visibility" value="all">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon all"><i class="fas fa-globe"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>All students (share publicly)</strong>
+                                    <small>Every student can see this quiz, including other teachers' students</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="assign-visibility" value="specific">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon specific"><i class="fas fa-user-check"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>Specific students</strong>
+                                    <small>Only selected students from your roster can access</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="assign-visibility" value="hidden">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon is-hidden"><i class="fas fa-eye-slash"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>Hidden</strong>
+                                    <small>No students can see this quiz</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div id="assign-students-panel" class="assign-students-panel hidden">
+                        <div class="assign-students-panel-header">
+                            <p class="assign-modal-section-label m-0">Assigned students</p>
+                            <span id="assign-selected-count" class="assign-selected-count">0 selected</span>
+                        </div>
+                        <div id="assign-students-list" class="assign-students-list"></div>
+                    </div>
+                </div>
+
+                <div class="assign-modal-footer">
+                    <button type="button" id="assign-cancel-btn" class="btn-secondary">Cancel</button>
+                    <button type="button" id="assign-save-btn" class="btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="qb-bulk-ai-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="qb-bulk-ai-modal-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal qb-bulk-ai-modal-panel" role="dialog" aria-labelledby="qb-bulk-ai-modal-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon" aria-hidden="true">
+                            <i class="fas fa-wand-magic-sparkles"></i>
+                        </div>
+                        <div>
+                            <h3 id="qb-bulk-ai-modal-title">Generate AI explanations</h3>
+                            <p id="qb-bulk-ai-modal-desc" class="assign-modal-quiz-name">Generate explanations for all questions in this quiz?</p>
+                        </div>
+                    </div>
+                    <button type="button" id="qb-bulk-ai-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="assign-modal-body admin-form-modal-body">
+                    <div id="qb-bulk-ai-options" class="qb-bulk-ai-options hidden">
+                        <p class="assign-modal-section-label">Which questions?</p>
+                        <div class="assign-visibility-options" role="radiogroup" aria-label="Bulk AI explanation scope">
+                            <label class="assign-visibility-card" id="qb-bulk-ai-mode-missing-label">
+                                <input type="radio" name="qb-bulk-ai-mode" value="missing_only" checked>
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon specific"><i class="fas fa-plus-circle"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>Questions without explanation only</strong>
+                                        <small id="qb-bulk-ai-missing-count">Generate for remaining questions</small>
+                                    </span>
+                                </span>
+                            </label>
+                            <label class="assign-visibility-card">
+                                <input type="radio" name="qb-bulk-ai-mode" value="all">
+                                <span class="assign-visibility-card-inner">
+                                    <span class="assign-visibility-icon all"><i class="fas fa-arrows-rotate"></i></span>
+                                    <span class="assign-visibility-text">
+                                        <strong>All questions</strong>
+                                        <small id="qb-bulk-ai-all-count">Replace existing explanations</small>
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="assign-modal-footer">
+                    <button type="button" id="qb-bulk-ai-cancel-btn" class="btn-secondary">Cancel</button>
+                    <button type="button" id="qb-bulk-ai-confirm-btn" class="btn-primary">
+                        <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Admin Flashcard Editor -->
+        <section id="admin-flashcard-editor-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button type="button" id="fe-back-btn" class="btn-secondary studio-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 id="fe-page-title" style="font-size:1.25rem;">Create flashcard set</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" id="fe-export-btn" class="btn-secondary studio-save-btn">
+                            <i class="fas fa-file-export"></i> Export
+                        </button>
+                        <button type="button" id="fe-save-btn" class="btn-primary studio-save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <main class="admin-container" style="padding-bottom:5rem; padding-left:1rem; padding-right:1rem;">
+
+
+                <div class="glass-card studio-main-card">
+                    <div class="qb-header-row" style="grid-template-columns:2fr 1fr;">
+                        <div class="input-group-vertical">
+                            <label class="studio-label studio-label-primary">Set title</label>
+                            <input type="text" id="fe-title" class="input-full studio-input-header" placeholder="e.g. IELTS Vocabulary Week 1" autocomplete="off">
+                        </div>
+                        <div class="input-group-vertical">
+                            <label class="studio-label">Student Access</label>
+                            <select id="fe-visibility" class="input-full" style="padding:1rem 1.25rem;">
+                                <option value="my_students">My students</option>
+                                <option value="all">All students (shared)</option>
+                                <option value="specific">Specific students</option>
+                                <option value="hidden">Hidden</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="fe-students-panel" class="qb-students-panel hidden">
+                        <label class="studio-label">Select students who can access this set</label>
+                        <div id="fe-students-list" class="qb-students-list"></div>
+                    </div>
+
+                    <div class="qb-questions-section-head">
+                        <div class="qb-questions-section-top" style="margin-bottom: 1rem;">
+                            <div class="qb-questions-section-intro">
+                                <h3 class="text-lg m-0" style="font-size:1.25rem;">Cards</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="fe-cards-container" class="fe-cards-container"></div>
+                    <div class="flex justify-center mt-6" style="gap: 1rem;">
+                        <button type="button" id="fe-add-card-btn" class="btn-primary" style="padding:1rem 2rem;border-radius:12px;display:inline-flex;align-items:center;gap:0.75rem;">
+                            <i class="fas fa-plus"></i> Add card
+                        </button>
+                        <button type="button" id="fe-import-btn" class="btn-secondary" style="padding:1rem 2rem;border-radius:12px;background:white;display:inline-flex;align-items:center;gap:0.75rem;">
+                            <i class="fas fa-paste"></i> Import
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Screen: Student Flashcard Editor -->
+        <section id="student-flashcard-editor-screen" class="screen hidden">
+            <header class="app-header studio-header">
+                <div class="header-content admin-container">
+                    <div class="user-info">
+                        <button type="button" id="sfe-back-btn" class="btn-secondary studio-back-btn">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 id="sfe-page-title" style="font-size:1.25rem;">Create flashcard set</h2>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" id="sfe-export-btn" class="btn-secondary studio-save-btn">
+                            <i class="fas fa-file-export"></i> Export
+                        </button>
+                        <button type="button" id="sfe-save-btn" class="btn-primary studio-save-btn">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <main class="admin-container" style="padding-bottom:5rem; padding-left:1rem; padding-right:1rem;">
+                <div class="glass-card studio-main-card">
+                    <div class="qb-header-row" style="grid-template-columns:1fr;">
+                        <div class="input-group-vertical">
+                            <label class="studio-label studio-label-primary">Set title</label>
+                            <input type="text" id="sfe-title" class="input-full studio-input-header" placeholder="e.g. My Vocabulary" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="qb-questions-section-head">
+                        <div class="qb-questions-section-top" style="margin-bottom: 1rem;">
+                            <div class="qb-questions-section-intro">
+                                <h3 class="text-lg m-0" style="font-size:1.25rem;">Cards</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="sfe-cards-container" class="fe-cards-container"></div>
+                    <div class="flex justify-center mt-6" style="gap: 1rem;">
+                        <button type="button" id="sfe-add-card-btn" class="btn-primary" style="padding:1rem 2rem;border-radius:12px;display:inline-flex;align-items:center;gap:0.75rem;">
+                            <i class="fas fa-plus"></i> Add card
+                        </button>
+                        <button type="button" id="sfe-import-btn" class="btn-secondary" style="padding:1rem 2rem;border-radius:12px;background:white;display:inline-flex;align-items:center;gap:0.75rem;">
+                            <i class="fas fa-paste"></i> Import
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- Screen: Student Flashcard Study -->
+        <section id="student-flashcard-study-screen" class="screen hidden">
+            <header class="quiz-header">
+                <div class="quiz-header-main">
+                    <div class="quiz-header-start">
+                        <button type="button" id="fs-back-btn" class="btn-text btn-text-with-icon">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i> Back
+                        </button>
+                    </div>
+                    <div class="quiz-header-center">
+                        <div class="quiz-meta">
+                            <h3 id="fs-set-title">Set Title</h3>
+                        </div>
+                    </div>
+                    <div class="quiz-header-end" style="display:flex; align-items:center; gap: 0.75rem;">
+                        <div class="fs-dropdown">
+                            <button type="button" class="fs-mode-btn" id="fs-mode-btn">
+                                <i class="fas fa-layer-group"></i> Flashcard <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="fs-dropdown-menu" id="fs-mode-menu">
+                                <button type="button" class="fs-dropdown-option active" data-mode="flashcard">
+                                    <i class="fas fa-layer-group"></i> Flashcard
+                                </button>
+                                <button type="button" class="fs-dropdown-option" data-mode="Learn">
+                                    <i class="fas fa-brain"></i> Learn
+                                </button>
+                                <button type="button" class="fs-dropdown-option" data-mode="Test">
+                                    <i class="fas fa-file-alt"></i> Test
+                                </button>
+                                <button type="button" class="fs-dropdown-option" data-mode="Game">
+                                    <i class="fas fa-gamepad"></i> Game
+                                </button>
+                                <button type="button" class="fs-dropdown-option" data-mode="AI Quiz">
+                                    <i class="fas fa-robot"></i> AI Quiz
+                                </button>
+                            </div>
+                        </div>
+                        <div class="fs-dropdown">
+                            <button type="button" class="btn-icon fs-header-btn" id="fs-more-btn" title="More options">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="fs-dropdown-menu" id="fs-more-menu" style="right: 0; left: auto;">
+                                <button type="button" class="fs-dropdown-option" id="fs-edit-btn">
+                                    <i class="fas fa-pen"></i> Edit set
+                                </button>
+                                <button type="button" class="fs-dropdown-option" id="fs-export-btn">
+                                    <i class="fas fa-file-export"></i> Export to text
+                                </button>
+                                <button type="button" class="fs-dropdown-option" id="fs-delete-btn" style="color: #EF4444;">
+                                    <i class="fas fa-trash"></i> Delete set
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width:0%"></div>
+                </div>
+            </header>
+            <div class="fs-body" style="justify-content:flex-start;padding-top:3.5rem;">
+                <div class="fs-card-container" id="fs-card-container">
+                    <div class="fs-card" id="fs-card">
+                        <div class="fs-card-inner" id="fs-card-inner">
+                            <div class="fs-card-front" id="fs-card-front">
+                                <button type="button" class="fs-star-btn" aria-label="Star card">
+                                    <i class="far fa-star"></i>
+                                </button>
+                                <button type="button" id="fs-sound-btn" class="fs-sound-btn" aria-label="Phát âm">
+                                    <i class="fas fa-volume-up" aria-hidden="true"></i>
+                                </button>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+                                    <p class="fs-card-text" id="fs-front-text">Word</p>
+                                    <div id="fs-front-badges" class="fs-card-badges" style="margin-bottom: 0;"></div>
+                                </div>
+                            </div>
+                            <div class="fs-card-back" id="fs-card-back">
+                                <button type="button" class="fs-star-btn" aria-label="Star card">
+                                    <i class="far fa-star"></i>
+                                </button>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+                                    <p class="fs-card-text" id="fs-back-text">Meaning</p>
+                                    <div id="fs-back-badges" class="fs-card-badges" style="margin-bottom: 0;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fs-controls-container">
+                    <div class="fs-controls-left">
+                        <button type="button" id="fs-autoplay-btn" class="fs-icon-btn" aria-label="Auto-play">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button type="button" id="fs-shuffle-btn" class="fs-icon-btn" aria-label="Shuffle">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button type="button" id="fs-starred-only-btn" class="fs-icon-btn" aria-label="Only study starred cards" title="Only study starred cards">
+                            <i class="far fa-star"></i>
+                        </button>
+                    </div>
+                    <div class="fs-nav">
+                        <button type="button" id="fs-prev-btn" class="fs-nav-btn" disabled aria-label="Previous card">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <span id="fs-progress" class="fs-progress">0/0</span>
+                        <button type="button" id="fs-next-btn" class="fs-nav-btn" aria-label="Next card">
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="fs-controls-right">
+                        <button type="button" id="fs-settings-btn" class="fs-icon-btn" aria-label="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                        <button type="button" id="fs-fullscreen-btn" class="fs-icon-btn" aria-label="Full screen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="fs-view-all-wrap">
+                    <div id="fs-vocab-list" class="fs-vocab-list"></div>
+                </div>
+            </div>
+            
+            <!-- Learn Mode Container -->
+            <div id="fs-learn-body" class="fs-learn-body hidden">
+
+                <!-- Learn Setup Screen -->
+                <div id="fs-learn-setup" class="fs-learn-setup">
+                    <div class="fs-learn-card fs-learn-card--setup">
+                        <div class="fs-learn-inner">
+
+                            <div class="fs-learn-section">
+                                <label class="fs-learn-section-label">Number of questions</label>
+                                <div class="fs-learn-qchips">
+                                    <button type="button" class="fs-learn-qchip" data-value="10">10</button>
+                                    <button type="button" class="fs-learn-qchip" data-value="20">20</button>
+                                    <button type="button" class="fs-learn-qchip" data-value="50">50</button>
+                                    <button type="button" class="fs-learn-qchip active" data-value="all">All</button>
+                                </div>
+                            </div>
+
+                            <div class="fs-learn-section">
+                                <div class="fs-learn-section-row">
+                                    <label class="fs-learn-section-label">Question Types</label>
+                                    <button type="button" id="fs-learn-select-all" class="fs-learn-select-all">Select All</button>
+                                </div>
+                                <div class="fs-learn-type-grid">
+                                    <label class="fs-learn-type-card active" for="fs-learn-type-mc">
+                                        <input type="checkbox" id="fs-learn-type-mc" checked class="hidden">
+                                        <i class="fas fa-list-ul"></i>
+                                        <div class="fs-learn-type-content">
+                                            <span class="fs-learn-type-title">Multiple Choice</span>
+                                            <span class="fs-learn-type-desc">Select the right answer</span>
+                                        </div>
+                                    </label>
+                                    <label class="fs-learn-type-card active" for="fs-learn-type-written">
+                                        <input type="checkbox" id="fs-learn-type-written" checked class="hidden">
+                                        <i class="fas fa-keyboard"></i>
+                                        <div class="fs-learn-type-content">
+                                            <span class="fs-learn-type-title">Writing</span>
+                                            <span class="fs-learn-type-desc">Type the answer</span>
+                                        </div>
+                                    </label>
+                                    <label class="fs-learn-type-card active" for="fs-learn-type-listen">
+                                        <input type="checkbox" id="fs-learn-type-listen" checked class="hidden">
+                                        <i class="fas fa-headphones-alt"></i>
+                                        <div class="fs-learn-type-content">
+                                            <span class="fs-learn-type-title">Listening</span>
+                                            <span class="fs-learn-type-desc">Type what you hear</span>
+                                        </div>
+                                    </label>
+                                    <label class="fs-learn-type-card" for="fs-learn-type-fill">
+                                        <input type="checkbox" id="fs-learn-type-fill" class="hidden">
+                                        <i class="fas fa-pen-nib"></i>
+                                        <div class="fs-learn-type-content">
+                                            <span class="fs-learn-type-title">Fill in the blank</span>
+                                            <span class="fs-learn-type-desc">Phrases only</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="fs-learn-section">
+                                <label class="fs-learn-section-label">Optional settings</label>
+                                <div class="fs-learn-options-grid">
+                                    <label class="fs-learn-option-tile" for="fs-learn-timer-toggle">
+                                        <div class="fs-learn-option-tile-icon"><i class="fas fa-clock"></i></div>
+                                        <div class="fs-learn-option-tile-info">
+                                            <span class="fs-learn-option-tile-label">Timer</span>
+                                            <span class="fs-learn-option-tile-desc">15s per question</span>
+                                        </div>
+                                        <input type="checkbox" id="fs-learn-timer-toggle" class="hidden">
+                                        <span class="fs-learn-option-tile-toggle"></span>
+                                    </label>
+                                    <label class="fs-learn-option-tile fs-learn-option-tile--starred" for="fs-learn-starred-toggle">
+                                        <div class="fs-learn-option-tile-icon fs-learn-option-tile-icon--star"><i class="fas fa-star"></i></div>
+                                        <div class="fs-learn-option-tile-info">
+                                            <span class="fs-learn-option-tile-label">Starred only</span>
+                                            <span class="fs-learn-option-tile-desc" id="fs-learn-starred-hint">Only study your marked cards</span>
+                                        </div>
+                                        <input type="checkbox" id="fs-learn-starred-toggle" class="hidden">
+                                        <span class="fs-learn-option-tile-toggle"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="button" id="fs-learn-start-btn" class="fs-learn-start-btn">
+                                <i class="fas fa-play"></i> Start
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learn Gameplay Screen -->
+                <div id="fs-learn-play" class="fs-learn-play hidden">
+                    <div class="fs-play-topbar">
+                        <div class="fs-play-topbar-start">
+                            <span class="fs-play-progress-text" id="fs-learn-progress">1 / 20</span>
+                        </div>
+                        <div class="fs-play-topbar-center">
+                            <div class="fs-play-progress-track">
+                                <div class="fs-play-progress-fill" id="fs-learn-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="fs-play-topbar-end">
+                            <span id="fs-learn-timer-display" class="fs-play-timer hidden"><i class="fas fa-clock"></i> 15s</span>
+                            <button type="button" id="fs-learn-quit-btn" class="fs-play-quit-btn"><i class="fas fa-times"></i> End</button>
+                        </div>
+                    </div>
+
+                    <div class="fs-learn-card fs-learn-card--play">
+                        <div class="fs-learn-inner">
+                            <div id="fs-learn-question-container" class="fs-learn-question">
+                                <!-- Dynamic Question UI injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fs-learn-feedback" class="fs-learn-feedback hidden">
+                        <div id="fs-learn-feedback-banner" class="fs-learn-feedback-inner">
+                            <div class="fs-learn-feedback-body">
+                                <h3 class="fs-learn-feedback-title" id="fs-learn-feedback-title"><i class="fas fa-check-circle"></i> Correct</h3>
+                                <p class="fs-learn-feedback-text" id="fs-learn-feedback-text">Good job!</p>
+                            </div>
+                        </div>
+                        <div class="fs-learn-feedback-actions">
+                            <button type="button" id="fs-learn-override-btn" class="btn-text fs-learn-override-btn hidden">Accept this answer</button>
+                            <button type="button" id="fs-learn-next-btn" class="btn-secondary fs-learn-next-btn">Continue <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learn Results Screen -->
+                <div id="fs-learn-results" class="fs-learn-results hidden">
+                    <div class="fs-learn-card fs-learn-card--results">
+                        <div class="fs-learn-inner">
+                            <div class="fs-results-trophy"><i class="fas fa-trophy"></i></div>
+                            <h2 class="fs-results-title">Session Complete!</h2>
+                            <p class="fs-results-subtitle">You've completed the session. Keep up the great work!</p>
+
+                            <div class="fs-results-stats">
+                                <div class="fs-results-stat fs-results-stat--accuracy">
+                                    <div class="fs-results-stat-number" id="fs-learn-score">80%</div>
+                                    <div class="fs-results-stat-label">Accuracy</div>
+                                </div>
+                                <div class="fs-results-stat fs-results-stat--correct">
+                                    <div class="fs-results-stat-number" id="fs-learn-correct-count">16/20</div>
+                                    <div class="fs-results-stat-label">Correct Answers</div>
+                                </div>
+                            </div>
+
+                            <div class="fs-results-actions">
+                                <button type="button" id="fs-learn-restart-btn" class="fs-learn-start-btn"><i class="fas fa-redo"></i> Study Again</button>
+                                <button type="button" id="fs-learn-back-btn" class="fs-learn-back-btn"><i class="fas fa-arrow-left"></i> Back to Flashcards</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Modal: Flashcard Settings -->
+        <div id="fs-settings-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="fs-settings-modal-backdrop"></div>
+            <div class="admin-modal-panel admin-form-modal" role="dialog" aria-labelledby="fs-settings-modal-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-access" aria-hidden="true">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div>
+                            <h3 id="fs-settings-modal-title">Flashcard Settings</h3>
+                            <p class="assign-modal-quiz-name">Customize your study experience</p>
+                        </div>
+                    </div>
+                    <button type="button" id="fs-settings-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="admin-form-modal-body fs-settings-body">
+                    <div class="fs-setting-item">
+                        <div class="fs-setting-info">
+                            <div class="fs-setting-icon"><i class="fas fa-layer-group"></i></div>
+                            <div class="fs-setting-text">
+                                <h4>Front Face</h4>
+                                <p>Choose which side to show first</p>
+                            </div>
+                        </div>
+                        <div class="fs-setting-control">
+                            <select id="fs-setting-face" class="fs-setting-select">
+                                <option value="word">Word (English)</option>
+                                <option value="meaning">Meaning (VN)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="fs-setting-item">
+                        <div class="fs-setting-info">
+                            <div class="fs-setting-icon"><i class="fas fa-stopwatch"></i></div>
+                            <div class="fs-setting-text">
+                                <h4>Auto-play Timing</h4>
+                                <p>Seconds to wait before moving</p>
+                            </div>
+                        </div>
+                        <div class="fs-setting-control">
+                            <input type="number" id="fs-setting-time" class="fs-setting-input" min="1" max="10" value="3">
+                        </div>
+                    </div>
+                    
+                    <div class="fs-setting-item">
+                        <div class="fs-setting-info">
+                            <div class="fs-setting-icon"><i class="fas fa-volume-up"></i></div>
+                            <div class="fs-setting-text">
+                                <h4>Auto-play Sound</h4>
+                                <p>Pronounce words automatically</p>
+                            </div>
+                        </div>
+                        <div class="fs-setting-control">
+                            <label class="fs-toggle-switch" aria-label="Auto-play sound">
+                                <input type="checkbox" id="fs-setting-sound">
+                                <span class="fs-toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-form-modal-footer">
+                    <button type="button" id="fs-settings-save" class="btn btn-primary" style="width:100%;">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Flashcard Assign / Manage Access -->
+        <div id="fc-assign-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="fc-assign-modal-backdrop"></div>
+            <div class="admin-modal-panel assign-modal-panel admin-form-modal admin-access-modal" role="dialog" aria-labelledby="fc-assign-modal-title">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-access" aria-hidden="true">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <div>
+                            <h3 id="fc-assign-modal-title">Manage Flashcard Access</h3>
+                            <p id="fc-assign-modal-name" class="assign-modal-quiz-name">Choose who can see this flashcard set</p>
+                        </div>
+                    </div>
+                    <button type="button" id="fc-assign-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="assign-modal-body admin-form-modal-body">
+                    <p class="assign-modal-section-label">Visibility</p>
+                    <div class="assign-visibility-options" role="radiogroup" aria-label="Flashcard visibility">
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="fc-assign-visibility" value="my_students" checked>
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon my-students"><i class="fas fa-users"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>My students</strong>
+                                    <small>Only students you created can see this set</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="fc-assign-visibility" value="all">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon all"><i class="fas fa-globe"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>All students (shared)</strong>
+                                    <small>Every student can see this set</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="fc-assign-visibility" value="specific">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon specific"><i class="fas fa-user-check"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>Specific students</strong>
+                                    <small>Only selected students from your roster can access</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="assign-visibility-card">
+                            <input type="radio" name="fc-assign-visibility" value="hidden">
+                            <span class="assign-visibility-card-inner">
+                                <span class="assign-visibility-icon is-hidden"><i class="fas fa-eye-slash"></i></span>
+                                <span class="assign-visibility-text">
+                                    <strong>Hidden</strong>
+                                    <small>No students can see this set</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div id="fc-assign-students-panel" class="assign-students-panel hidden">
+                        <div class="assign-students-panel-header">
+                            <p class="assign-modal-section-label m-0">Assigned students</p>
+                            <span id="fc-assign-selected-count" class="assign-selected-count">0 selected</span>
+                        </div>
+                        <div id="fc-assign-students-list" class="assign-students-list"></div>
+                    </div>
+                </div>
+                <div class="assign-modal-footer">
+                    <button type="button" id="fc-assign-cancel-btn" class="btn-secondary">Cancel</button>
+                    <button type="button" id="fc-assign-save-btn" class="btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+
+        <footer id="app-footer" class="app-footer">
+            <div class="app-footer-inner">
+                <p class="app-footer-links">
+                    <a href="https://github.com/nstpvcpiooi" class="app-footer-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-github" aria-hidden="true"></i> GitHub
+                    </a>
+                    <a href="https://www.instagram.com/_nstpvcpiooi/" class="app-footer-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram" aria-hidden="true"></i> Instagram
+                    </a>
+                    <a href="https://www.facebook.com/nstpvcpiooi" class="app-footer-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-facebook" aria-hidden="true"></i> Facebook
+                    </a>
+                </p>
+                <p class="app-footer-note">A product by Khuat Tuan Anh · All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+        <!-- Modal: Import Flashcards -->
+        <div id="import-flashcard-modal" class="admin-modal hidden" aria-hidden="true">
+            <div class="admin-modal-backdrop" id="import-flashcard-modal-backdrop"></div>
+            <div class="admin-modal-panel admin-form-modal" role="dialog" aria-labelledby="import-flashcard-modal-title" style="max-width: 600px;">
+                <div class="assign-modal-header">
+                    <div class="assign-modal-header-main">
+                        <div class="assign-modal-icon is-access" aria-hidden="true" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">
+                            <i class="fas fa-paste"></i>
+                        </div>
+                        <div>
+                            <h3 id="import-flashcard-modal-title">Import Flashcards</h3>
+                            <p class="assign-modal-quiz-name">Paste text in format: <b>word</b> <i>[tab]</i> <b>meaning</b> (each card on a new line)</p>
+                        </div>
+                    </div>
+                    <button type="button" id="import-flashcard-modal-close" class="result-detail-close" aria-label="Close">&times;</button>
+                </div>
+                <div class="admin-form-modal-body" style="padding: 1.5rem;">
+                    <textarea id="import-flashcard-textarea" class="form-input" style="height: 250px; font-family: monospace; padding: 1.25rem; background: #F9FAFB; border: 2px dashed #CBD5E1; border-radius: 12px; transition: border-color 0.2s; font-size: 0.95rem; line-height: 1.6; resize: none;" placeholder="Word 1&#9;Meaning 1&#10;Word 2&#9;Meaning 2" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#CBD5E1'"></textarea>
+                </div>
+                <div class="admin-form-modal-footer" style="display: flex; justify-content: flex-end; padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: #F8FAFC; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                    <button type="button" id="import-flashcard-submit" class="btn-primary" style="padding: 0.6rem 1.5rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check"></i> Import Cards
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
